@@ -1,0 +1,63 @@
+appId: com.supersoft.salespilot
+productName: SalesPilot CRM
+copyright: Copyright © 2025 SuperSoft Ltd. All rights reserved.
+
+# Maximum LZMA compression — reduces installer size by ~30-40%
+compression: maximum
+
+directories:
+  output: dist-package
+  buildResources: build-resources
+
+# Only include the compiled Electron main/preload — Next.js goes in extraResources
+files:
+  - dist/electron/**/*
+  - package.json
+
+extraResources:
+  - from: .next/standalone
+    to: standalone
+    filter:
+      - "**/*"
+  - from: .next/static
+    to: standalone/.next/static
+    filter:
+      - "**/*"
+  - from: public
+    to: standalone/public
+    filter:
+      - "**/*"
+  # Bundle .env so DATABASE_URL is available to the production server
+  - from: .env
+    to: .env
+  # Bundle schema SQL so the app can auto-create tables on first run
+  - from: prisma/schema.sql
+    to: prisma/schema.sql
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  # Drop your icon at build-resources/icon.ico (256x256, .ico format) to replace the default
+  icon: build-resources/icon.ico
+  requestedExecutionLevel: asInvoker
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: SalesPilot CRM
+  installerIcon: build-resources/icon.ico
+  uninstallerIcon: build-resources/icon.ico
+  installerHeaderIcon: build-resources/icon.ico
+  # Custom branding text shown bottom-left of every installer page
+  include: build-resources/installer.nsh
+
+# Do NOT fail the build if a code-signing cert is absent (dev builds)
+forceCodeSigning: false
